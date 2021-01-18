@@ -23,7 +23,9 @@ class NetworkConnection(url: String) {
   }
 
   fun getInputStream(): InputStream? {
-    inputStream = try { connection?.inputStream ?: null } catch (e: IOException) { null }
+    inputStream = try {
+      connection?.inputStream
+    } catch (e: IOException) { null }
     return inputStream
   }
 

@@ -1,7 +1,7 @@
 package io.github.hidroh.tldroid
 
 import android.content.Context
-import android.support.annotation.WorkerThread
+import androidx.annotation.WorkerThread
 
 class MarkdownProcessor(private val platform: String?) {
 

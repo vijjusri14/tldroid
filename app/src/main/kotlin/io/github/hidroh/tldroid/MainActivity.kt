@@ -1,16 +1,11 @@
 package io.github.hidroh.tldroid
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.databinding.DataBindingUtil
-import android.databinding.ViewDataBinding
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.provider.BaseColumns
-import android.support.design.widget.BottomSheetDialog
-import android.support.v4.widget.ResourceCursorAdapter
-import android.support.v7.widget.PopupMenu
 import android.text.TextUtils
 import android.text.format.DateUtils
 import android.view.Gravity
@@ -20,6 +15,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.widget.PopupMenu
+import androidx.cursoradapter.widget.ResourceCursorAdapter
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.google.android.material.bottomsheet.BottomSheetDialog
+
 
 class MainActivity : ThemedActivity() {
   private var mEditText: AutoCompleteTextView? = null
@@ -31,16 +33,16 @@ class MainActivity : ThemedActivity() {
 
   private fun setContentView() {
     DataBindingUtil.setContentView<ViewDataBinding>(this, R.layout.activity_main)
-    findViewById(R.id.info_button)!!.setOnClickListener { showInfo() }
-    findViewById(R.id.list_button)!!.setOnClickListener { showList() }
-    findViewById(R.id.settings_button)!!.setOnClickListener { showThemeOptions() }
-    mEditText = findViewById(R.id.edit_text) as AutoCompleteTextView?
+    findViewById<ImageButton>(R.id.update_button)!!.setOnClickListener { updatePackages() }
+    findViewById<ImageButton>(R.id.info_button)!!.setOnClickListener { showInfo() }
+    findViewById<ImageButton>(R.id.list_button)!!.setOnClickListener { showList() }
+    findViewById<ImageButton>(R.id.settings_button)!!.setOnClickListener { showThemeOptions() }
+    mEditText = findViewById<AutoCompleteTextView>(R.id.edit_text)
     mEditText!!.setOnEditorActionListener { v, actionId, _ ->
       actionId == EditorInfo.IME_ACTION_SEARCH && search(v.text.toString(), null)
     }
     mEditText!!.setAdapter(CursorAdapter(this))
-    mEditText!!.onItemClickListener = AdapterView.OnItemClickListener {
-      _, view, _, _ ->
+    mEditText!!.onItemClickListener = AdapterView.OnItemClickListener { _, view, _, _ ->
       val text = (view.findViewById(android.R.id.text1) as TextView).text
       val platform = (view.findViewById(android.R.id.text2) as TextView).text
       search(text.toString(), platform)
@@ -54,27 +56,32 @@ class MainActivity : ThemedActivity() {
     mEditText!!.setText(query)
     mEditText!!.setSelection(query.length)
     startActivity(Intent(this, CommandActivity::class.java)
-        .putExtra(CommandActivity.EXTRA_QUERY, query)
-        .putExtra(CommandActivity.EXTRA_PLATFORM, platform))
+            .putExtra(CommandActivity.EXTRA_QUERY, query)
+            .putExtra(CommandActivity.EXTRA_PLATFORM, platform))
     return true
+  }
+
+  private fun updatePackages() {
+    SyncService.enqueueWork(this, Application.indexIntent)
+    SyncService.enqueueWork(this, Application.zipIntent)
   }
 
   private fun showInfo() {
     closeSoftKeyboard()
     val binding = DataBindingUtil.inflate<ViewDataBinding>(layoutInflater,
-        R.layout.web_view, null, false)
-    val lastRefreshed = PreferenceManager.getDefaultSharedPreferences(this)
+            R.layout.web_view, null, false)
+    val lastRefreshed = getDefaultSharedPreferences(this)
         .getLong(SyncService.PREF_LAST_REFRESHED, 0L)
     val lastRefreshedText = if (lastRefreshed > 0)
       DateUtils.getRelativeDateTimeString(this, lastRefreshed,
-          DateUtils.HOUR_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0)
+              DateUtils.HOUR_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0)
     else
       getString(R.string.never)
-    val totalCommands = PreferenceManager.getDefaultSharedPreferences(this)
+    val totalCommands = getDefaultSharedPreferences(this)
         .getInt(SyncService.PREF_COMMAND_COUNT, 0)
     binding.setVariable(io.github.hidroh.tldroid.BR.content,
-        getString(R.string.info_html, lastRefreshedText, totalCommands) +
-            getString(R.string.about_html))
+            getString(R.string.info_html, lastRefreshedText, totalCommands) +
+                    getString(R.string.about_html))
     binding.root.id = R.id.web_view
     val dialog = BottomSheetDialog(this)
     dialog.setContentView(binding.root)
@@ -92,7 +99,7 @@ class MainActivity : ThemedActivity() {
     listView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
       val cursor = adapter.getItem(position) as Cursor? ?: return@OnItemClickListener
       search(cursor.getString(cursor.getColumnIndex(TldrProvider.CommandEntry.COLUMN_NAME)),
-          cursor.getString(cursor.getColumnIndex(TldrProvider.CommandEntry.COLUMN_PLATFORM)))
+              cursor.getString(cursor.getColumnIndex(TldrProvider.CommandEntry.COLUMN_PLATFORM)))
 
     }
     dialog.setContentView(view)
@@ -108,6 +115,7 @@ class MainActivity : ThemedActivity() {
         R.id.menu_tomorrow -> R.style.AppTheme_Tomorrow
         else -> R.style.AppTheme
       })
+      this.recreate()
       setContentView()
       true
     }
@@ -129,12 +137,12 @@ class MainActivity : ThemedActivity() {
       filterQueryProvider = FilterQueryProvider { constraint ->
         mQueryString = constraint?.toString() ?: ""
         context.contentResolver.query(TldrProvider.URI_COMMAND,
-            arrayOf(BaseColumns._ID,
-                TldrProvider.CommandEntry.COLUMN_NAME,
-                TldrProvider.CommandEntry.COLUMN_PLATFORM),
-            "${TldrProvider.CommandEntry.COLUMN_NAME} LIKE ?",
-            arrayOf("%$mQueryString%"),
-            null)
+                arrayOf(BaseColumns._ID,
+                        TldrProvider.CommandEntry.COLUMN_NAME,
+                        TldrProvider.CommandEntry.COLUMN_PLATFORM),
+                "${TldrProvider.CommandEntry.COLUMN_NAME} LIKE ?",
+                arrayOf("%$mQueryString%"),
+                null)
       }
     }
 
@@ -144,7 +152,7 @@ class MainActivity : ThemedActivity() {
 
     override fun newDropDownView(context: Context?, cursor: Cursor?, parent: ViewGroup): View {
       val holder = DataBindingUtil.inflate<ViewDataBinding>(mInflater, R.layout.dropdown_item,
-          parent, false)
+              parent, false)
       val view = holder.root
       view.setTag(R.id.dataBinding, holder)
       return view
@@ -153,13 +161,13 @@ class MainActivity : ThemedActivity() {
     override fun bindView(view: View, context: Context, cursor: Cursor) {
       val binding = view.getTag(R.id.dataBinding) as ViewDataBinding
       binding.setVariable(io.github.hidroh.tldroid.BR.command,
-          Bindings.Command.fromProvider(cursor))
+              Bindings.Command.fromProvider(cursor))
       binding.setVariable(io.github.hidroh.tldroid.BR.highlight, mQueryString)
     }
 
     override fun convertToString(cursor: Cursor?): CharSequence {
       return cursor!!.getString(cursor.getColumnIndexOrThrow(
-          TldrProvider.CommandEntry.COLUMN_NAME))
+              TldrProvider.CommandEntry.COLUMN_NAME))
     }
   }
 }

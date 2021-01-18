@@ -2,11 +2,11 @@ package io.github.hidroh.tldroid
 
 import android.content.Context
 import android.database.Cursor
-import android.databinding.BaseObservable
-import android.databinding.BindingAdapter
-import android.support.annotation.AttrRes
-import android.support.annotation.IdRes
-import android.support.v4.content.ContextCompat
+import androidx.databinding.BaseObservable
+import androidx.databinding.BindingAdapter
+import androidx.annotation.AttrRes
+import androidx.annotation.IdRes
+import androidx.core.content.ContextCompat
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextUtils

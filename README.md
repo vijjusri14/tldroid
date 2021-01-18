@@ -1,4 +1,4 @@
-## tldroid
+## tldroid (Working Clone)
 [tldr](https://github.com/tldr-pages/tldr) Android client written in [Kotlin](https://kotlinlang.org/), uses [data binding](http://developer.android.com/tools/data-binding/guide.html), [Constraint Layout](http://tools.android.com/tech-docs/layout-editor), tested with [Android testing support library](https://google.github.io/android-testing-support-library/), compatible with Android 2.3 and up.
 
 

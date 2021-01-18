@@ -2,7 +2,8 @@ package io.github.hidroh.tldroid
 
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.assertj.core.api.Assertions
 import org.junit.After
 import org.junit.Before
@@ -33,8 +34,8 @@ class NetworkConnectionTest {
     server.enqueue(MockResponse().setBody("{}"))
     val connection = NetworkConnection(server.url("/index.json").toString())
     connection.connect()
-    Assertions.assertThat(Okio.buffer(Okio.source(connection.getInputStream())).readUtf8())
-        .isEqualTo("{}")
+    Assertions.assertThat(connection.getInputStream()?.source()?.buffer()?.readUtf8())
+            .isEqualTo("{}")
     connection.disconnect()
   }
 

@@ -1,11 +1,11 @@
 package io.github.hidroh.tldroid
 
-import android.databinding.DataBindingUtil
-import android.databinding.ViewDataBinding
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.util.Pair
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.util.Pair
 import android.text.TextUtils
 import android.view.View
 import android.widget.EditText
@@ -16,8 +16,8 @@ import java.lang.ref.WeakReference
 class RunActivity : ThemedActivity() {
   companion object {
     val EXTRA_COMMAND = RunActivity::class.java.name + ".EXTRA_COMMAND"
-    private val STATE_ERROR = "state:error"
-    private val STATE_OUTPUT = "state:output"
+    private const val STATE_ERROR = "state:error"
+    private const val STATE_OUTPUT = "state:output"
   }
 
   private var mOutput: TextView? = null
@@ -28,13 +28,15 @@ class RunActivity : ThemedActivity() {
     DataBindingUtil.setContentView<ViewDataBinding>(this, R.layout.activity_run)
     val snackbar = Snackbar.make(findViewById(android.R.id.content),
         R.string.run_warning, Snackbar.LENGTH_INDEFINITE)
-    snackbar.setAction(android.R.string.ok, { snackbar.dismiss() }).show()
-    mOutput = findViewById(R.id.output) as TextView?
-    mError = findViewById(R.id.error) as TextView?
+    snackbar.setAction(android.R.string.ok) { snackbar.dismiss() }.show()
+    mOutput = findViewById<TextView>(R.id.output)
+    mError = findViewById<TextView>(R.id.error)
     val command = intent.getStringExtra(EXTRA_COMMAND)
-    (findViewById(R.id.prompt) as TextView).append(command)
-    (findViewById(R.id.edit_text) as EditText).setOnEditorActionListener { v, _, _ ->
-      execute(command, v.text.toString().trim())
+    (findViewById<TextView>(R.id.prompt)).append(command)
+    (findViewById<EditText>(R.id.edit_text)).setOnEditorActionListener { v, _, _ ->
+      if (command != null) {
+        execute(command, v.text.toString().trim())
+      }
       true
     }
     if (savedInstanceState != null) {
@@ -71,23 +73,18 @@ class RunActivity : ThemedActivity() {
 
   internal class RunTask(runActivity: RunActivity) :
       AsyncTask<String, Void, Pair<String, String>>() {
-    private val mRunActivity: WeakReference<RunActivity>
-
-    init {
-      mRunActivity = WeakReference(runActivity)
-    }
+    private val mRunActivity: WeakReference<RunActivity> = WeakReference(runActivity)
 
     override fun doInBackground(vararg params: String): Pair<String, String> {
-      try {
+      return try {
         val process = Runtime.getRuntime().exec(params)
         val stderr = Utils.readUtf8(process.errorStream)
         val stdout = Utils.readUtf8(process.inputStream)
         process.destroy()
-        return Pair.create(stdout, stderr)
+        Pair.create(stdout, stderr)
       } catch (e: IOException) {
-        return Pair.create<String, String>(null, e.message)
+        Pair.create<String, String>(null, e.message)
       }
-
     }
 
     override fun onPostExecute(output: Pair<String, String>) {

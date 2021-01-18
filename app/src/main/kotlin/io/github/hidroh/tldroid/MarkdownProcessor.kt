@@ -4,7 +4,7 @@ import android.content.ContentProviderOperation
 import android.content.Context
 import android.content.OperationApplicationException
 import android.os.RemoteException
-import android.support.annotation.WorkerThread
+import androidx.annotation.WorkerThread
 import android.text.TextUtils
 import com.github.rjeschke.txtmark.Processor
 import java.io.File

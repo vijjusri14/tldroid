@@ -14,8 +14,8 @@ class TldrProvider : ContentProvider() {
 
   companion object {
     const val AUTHORITY = "io.github.hidroh.tldroid.provider"
-    val URI_COMMAND = Uri
-        .parse("content://" + AUTHORITY)
+    val URI_COMMAND: Uri = Uri
+        .parse("content://$AUTHORITY")
         .buildUpon()
         .appendPath(CommandEntry.TABLE_NAME)
         .build()
@@ -35,7 +35,7 @@ class TldrProvider : ContentProvider() {
   private var mDbHelper: DbHelper? = null
 
   override fun onCreate(): Boolean {
-    mDbHelper = DbHelper(context)
+    mDbHelper = DbHelper(context!!)
     return true
   }
 

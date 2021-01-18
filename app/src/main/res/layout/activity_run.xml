@@ -5,7 +5,7 @@
 
     <data />
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:background="?attr/themedBackground"
         android:layout_width="match_parent"
@@ -99,6 +99,6 @@
 
         </ScrollView>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

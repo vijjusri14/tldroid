@@ -1,19 +1,19 @@
 package io.github.hidroh.tldroid
 
 import android.content.Intent
-import android.support.test.InstrumentationRegistry
-import android.support.test.espresso.Espresso.onView
-import android.support.test.espresso.action.ViewActions.click
-import android.support.test.espresso.intent.Intents.intended
-import android.support.test.espresso.intent.matcher.ComponentNameMatchers.hasClassName
-import android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import android.support.test.espresso.intent.rule.IntentsTestRule
-import android.support.test.espresso.matcher.ViewMatchers.withContentDescription
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.espresso.web.assertion.WebViewAssertions.webContent
-import android.support.test.espresso.web.matcher.DomMatchers.containingTextInBody
-import android.support.test.espresso.web.sugar.Web.onWebView
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.matcher.ComponentNameMatchers.hasClassName
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.web.assertion.WebViewAssertions.webContent
+import androidx.test.espresso.web.matcher.DomMatchers.containingTextInBody
+import androidx.test.espresso.web.sugar.Web.onWebView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Rule
@@ -45,7 +45,7 @@ class CommandActivityTest {
   @Test
   fun testHomeClick() {
     intentsRule.launchActivity(Intent().putExtra(CommandActivity.EXTRA_QUERY, "ls"))
-    onView(withContentDescription(InstrumentationRegistry.getTargetContext()
+    onView(withContentDescription(InstrumentationRegistry.getInstrumentation().targetContext
         .getString(R.string.abc_action_bar_up_description)))
         .perform(click())
     assertThat(intentsRule.activity.isFinishing || intentsRule.activity.isDestroyed)
